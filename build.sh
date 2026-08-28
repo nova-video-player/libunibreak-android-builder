@@ -22,6 +22,12 @@ then
   cd ..
 fi
 
+if [ ! -f "libunibreak/configure" ]; then
+  cd libunibreak
+  autoreconf -fiv -Wno-obsolete
+  cd ..
+fi
+
 API_LEVEL=21
 
 for ABI in armeabi-v7a arm64-v8a x86 x86_64
@@ -53,15 +59,14 @@ do
   export CC="${TOOLCHAIN}/bin/${TARGET}${API_LEVEL}-clang"
   export CXX="${TOOLCHAIN}/bin/${TARGET}${API_LEVEL}-clang++"
 
-  export CFLAGS="-fPIC -O3 -Wl,-z,max-page-size=16384"
-  export CXXFLAGS="-fPIC -O3 -Wl,-z,max-page-size=16384"
+  export CFLAGS="-fPIC -O3"
+  export CXXFLAGS="-fPIC -O3"
   export LDFLAGS="-L${PREFIX}/lib/${ABI} -Wl,-z,max-page-size=16384"
 
   if [ ! -f "${PREBUILT_DIR}/lib/${ABI}/libunibreak.a" ]
   then
     echo "Building libunibreak for ${ABI}..."
     cd libunibreak
-    ./autogen.sh
     ./configure --host=${TARGET} --prefix="${PREFIX}" --libdir="${PREFIX}/lib/${ABI}" --enable-static --disable-shared
     make clean
     make -j${CORES}
